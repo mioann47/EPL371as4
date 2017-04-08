@@ -13,7 +13,10 @@
 /* For I/O */
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
+void reverse(char *);
+
+char test[1024];
+
 
 
 char *fileContents(char *path) {
@@ -59,21 +62,55 @@ char *fileContents(char *path) {
 }
 
 
-void reverse(char *);
 
-char test[1024];
-const char s[2] = " ";
+
+
+
+char *msg_not_implemented(){
+char *reply ="HTTP/1.1 501 Not Implemented\r\nServer: my_webserver\r\nConnection: close\r\nContent-Type: text/plain\r\nContent-Length: 24\r\n\r\nMethod not implemented!\n";
+char *tmp=(char*) malloc (strlen(reply)+1);
+strcpy(tmp,reply);
+return tmp;
+}
+
+
+
+char *msg_not_found(){
+char *reply = "HTTP/1.1 404 Not Found\r\nServer: My_test_server\r\nContent-Length: 20\r\nConnection: keep-alive\r\nContent-Type: text/plain\r\n\r\nDocument not found!\n";
+char *tmp=(char*) malloc (strlen(reply)+1);
+strcpy(tmp,reply);
+return tmp;
+}
+
+
+//char test[1024];
+const char s[2]=" ";
 
 // function prototype for reversing func.
 /* Server with Internet stream sockets */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 main(int argc, char *argv[]) {
-    int port, sock, newsock, serverlen, clientlen;
-    char buf[2560];
-    struct sockaddr_in server, client;
-    struct sockaddr *serverptr, *clientptr;
-    struct hostent *rem;
-    char *token;
-    char *contents;
+	int port, sock, newsock, serverlen, clientlen;
+	char buf[2560];
+	struct sockaddr_in server, client;
+	struct sockaddr *serverptr, *clientptr;
+	struct hostent *rem;
+
+char *token;
+
 
     sprintf(test, "HTTP/1.0 200 OK\r\n");    //line:netp:servestatic:beginserve
     sprintf(test, "%sServer: Sysstatd Web Server\r\n", test);
@@ -85,122 +122,129 @@ main(int argc, char *argv[]) {
             test);
 
 
-    if (argc < 2) { /* Check if server's port number is given */
-        printf("Please give the port number \n");
-        exit(1);
-    }
 
-    /* Create socket */
-    if ((sock = socket(PF_INET, SOCK_STREAM, 0)) < 0) {
-        perror("socket");
-        exit(1);
-    }
-    /* Convert port number to integer */
-    port = atoi(argv[1]);
-    server.sin_family = PF_INET; /* Internet domain */
-    server.sin_addr.s_addr = htonl(INADDR_ANY); /* My Internet address */
-    server.sin_port = htons(port); /* The given port */
-    serverptr = (struct sockaddr *) &server;
-    serverlen = sizeof(server);
-
-    /* Bind socket to address */
-    if (bind(sock, serverptr, serverlen) < 0) {
-        perror("bind");
-        exit(1);
-    }
-    /* Listen for connections */
-    if (listen(sock, 5) < 0) {
-        /* 5
-         max. requests in queue */
-        perror("listen");
-        exit(1);
-    }
-    printf("Listening for connections to port %d\n", port);
-
-    while (1) {
-        clientptr = (struct sockaddr *) &client;
-        clientlen = sizeof(client);
-        /* Accept connection */
-        if ((newsock = accept(sock, clientptr, &clientlen)) < 0) {
-            perror("accept");
-            exit(1);
-        }
-        /* Using IP address find DNS name (i.e., reverse DNS)*/
-        if ((rem = gethostbyaddr((char *) &client.sin_addr.s_addr,
-                                 sizeof(client.sin_addr.s_addr), client.sin_family)) == NULL) {
-            herror("gethostbyaddr");
-
-            exit(1);
-        }
-        printf("Accepted connection from %s\n", rem->h_name);
-
-        /* Create child for serving the client */
-        switch (fork()) {
-            case -1:
-                perror("fork");
-                exit(1);
-            case 0: /* Child process */
-                do {
-                    bzero(buf, sizeof(buf)); /* Initialize buffer */
-                    if (read(newsock, buf, sizeof(buf)) < 0) { /* Get message */
-                        perror("read");
-                        exit(1);
-                    }
-
-                    /** replace **/
-                    char *p = buf;
-                    while ((*p) != '\0') {
-                        if ((*p) == '\r' && (*(p + 1)) == '\n') {
-                            (*p) = ' ';
-                            (*(p + 1)) = ' ';
-                        }
-                        p++;
-                    }
+	
 
 
 
-                    /** TOKENIZER **/
-                    token = strtok(buf, s);
-                    char *file, *connection;
-                    while (token != NULL) {
-                        if (strcmp(token, "GET") == 0) {
-                            token = strtok(NULL, s);
-                            file = token;
-                        }
-                        if (strcmp(token, "Connection:") == 0) {
-                            token = strtok(NULL, s);
-                            connection = token;
-                        }
-                        token = strtok(NULL, s);
-                    }
-                    printf("file = %s\n", file);
 
-                    printf("connection = %s\n", connection);
 
-                    //printf("Read string: %s\n", buf);
-                    //reverse(buf); /* Reverse message */
+	if (argc < 2) { /* Check if server's port number is given */
+		printf("Please give the port number \n");
+		exit(1);
+	}
 
-                    if (write(newsock, test, sizeof(test)) < 0) {/* Send message */
-                        perror("write");
-                        exit(1);
-                    }
-                    contents = fileContents(file);
-                    //puts(contents);
+	/* Create socket */
+	if ((sock = socket(PF_INET, SOCK_STREAM, 0)) < 0) {
+		perror("socket");
+		exit(1);
+	}
+	/* Convert port number to integer */
+	port = atoi(argv[1]);
+	server.sin_family = PF_INET; /* Internet domain */
+	server.sin_addr.s_addr = htonl(INADDR_ANY); /* My Internet address */
+	server.sin_port = htons(port); /* The given port */
+	serverptr = (struct sockaddr *) &server;
+	serverlen = sizeof(server);
 
-                } while (strcmp(buf, "dne") != 0); /*Finish on "end" message*/
+	/* Bind socket to address */
+	if (bind(sock, serverptr, serverlen) < 0) {
+		perror("bind");
+		exit(1);
+	}
+	/* Listen for connections */
+	if (listen(sock, 5) < 0) {
+		/* 5
+		 max. requests in queue */
+		perror("listen");
+		exit(1);
+	}
+	printf("Listening for connections to port %d\n", port);
 
-                close(newsock); /* Close socket */
-                exit(0);
-        } /* end of switch */
-    } /* end of while(1) */
+	while (1) {
+		clientptr = (struct sockaddr *) &client;
+		clientlen = sizeof(client);
+		/* Accept connection */
+		if ((newsock = accept(sock, clientptr, &clientlen)) < 0) {
+			perror("accept");
+			exit(1);
+		}
+		/* Using IP address find DNS name (i.e., reverse DNS)*/
+		if ((rem = gethostbyaddr((char *) &client.sin_addr.s_addr,
+				sizeof(client.sin_addr.s_addr), client.sin_family)) == NULL) {
+			herror("gethostbyaddr");
+
+			exit(1);
+		}
+		printf("Accepted connection from %s\n", rem->h_name);
+
+		/* Create child for serving the client */
+		switch (fork()) {
+		case -1:
+			perror("fork");
+			exit(1);
+		case 0: /* Child process */
+			do {
+				bzero(buf, sizeof(buf)); /* Initialize buffer */
+				if (read(newsock, buf, sizeof(buf)) < 0) { /* Get message */
+					perror("read");
+					exit(1);
+				}
+				
+
+				printf("%s",buf);
+
+
+				/** replace **/
+				char *p=buf;
+				while ( (*p)!='\0' ){
+					if ((*p)=='\r'  && (*(p+1))=='\n') {(*p)=' ';(*(p+1))=' ';}
+					p++;
+				}					
+
+
+
+				/** TOKENIZER **/
+				token=strtok(buf,s);
+				char *file,*connection;
+				while (token!=NULL){
+						if (strcmp(token,"GET")==0)  { 	     token=strtok(NULL,s); file=token; }
+						if (strcmp(token,"Connection:")==0) {token=strtok(NULL,s); connection=token;}
+						token=strtok(NULL,s);
+					}
+
+
+
+				//printf("file = %s\n",file);
+
+
+
+				//printf("connection = %s\n",connection);
+				char *msgtemp = msg_not_implemented();
+				//printf("TEST\n%s\n",msgtemp);
+				
+				//printf("Read string: %s\n", buf);
+				//reverse(buf); /* Reverse message */
+
+
+				if (write(newsock, msgtemp, strlen(msgtemp)) < 0) {/* Send message */
+					perror("write");
+					exit(1);
+				}
+
+			} while (strcmp(buf, "dne") != 0); /*Finish on "end" message*/
+			close(newsock); /* Close socket */
+			exit(0);
+		} /* end of switch */
+	} /* end of while(1) */
 } /* end of main() */
 
 /* Function for reversing a string */
 void reverse(char *s) {
-    int c, i, j;
-    for (i = 0, j = strlen(s) - 1; i < j; i++, j--) {
-        c = s[i];
-        s[i] = s[j];
-        s[j] = c;
-    }
+	int c, i, j;
+	for (i = 0, j = strlen(s) - 1; i < j; i++, j--) {
+		c = s[i];
+		s[i] = s[j];
+		s[j] = c;
+	}
 }
