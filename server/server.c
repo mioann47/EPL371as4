@@ -1,21 +1,10 @@
 /* File: 
  server.c
  */
-#include <sys/types.h> 
-/* For sockets */
-#include <sys/socket.h> 
-/* For sockets */
-#include <netinet/in.h> 
-/* For Internet sockets */
-#include <netdb.h> 
-/* For gethostbyaddr() */
-#include <stdio.h> 
-/* For I/O */
-#include <stdlib.h>
-#include <string.h>
+#include "libs.h"
 void reverse(char *);
 
-char test[1024];
+
 
 
 
@@ -92,6 +81,40 @@ const char s[2]=" ";
 
 
 
+char *msg_ok(char *contents,char *connection,char* filetype){
+int len= strlen(contents);
+
+char *temp=malloc(strlen(contents)+200);
+	sprintf(temp, "HTTP/1.1 200 OK\r\n");    //line:netp:servestatic:beginserve
+   	sprintf(temp, "%sServer: Sysstatd Web Server\r\n", temp);
+   	sprintf(temp, "%sContent-length: %d\r\n", temp,len);
+	sprintf(temp, "%sConnection: %s\r\n", temp,connection);
+	sprintf(temp, "%sContent-type: %s\r\n\r\n", temp,filetype);
+	sprintf(temp, "%s%s",temp,contents);
+
+return temp;
+}
+
+
+
+char *get_filetype(char *filename) 
+{
+char *temp=malloc(20);
+    if (strstr(filename, ".html") )
+	strcpy(temp, "text/html");
+    else if (strstr(filename, ".gif"))
+	strcpy(temp, "image/gif");
+    else if (strstr(filename, ".jpg"))
+	strcpy(temp, "image/jpeg");
+    else if (strstr(filename, ".js"))
+	strcpy(temp, "text/javascript");
+    else if (strstr(filename, ".css"))
+	strcpy(temp, "text/css");
+    else
+	strcpy(temp, "text/plain");
+
+return temp;
+}  
 
 
 
@@ -101,13 +124,9 @@ const char s[2]=" ";
 
 
 
-
+char test[1024];
 main(int argc, char *argv[]) {
-	int port, sock, newsock, serverlen, clientlen;
-	char buf[2560];
-	struct sockaddr_in server, client;
-	struct sockaddr *serverptr, *clientptr;
-	struct hostent *rem;
+	
 
 char *token;
 
@@ -126,7 +145,11 @@ char *token;
 	
 
 
-
+	int port, sock, newsock, serverlen, clientlen;
+	char buf[2560];
+	struct sockaddr_in server, client;
+	struct sockaddr *serverptr, *clientptr;
+	struct hostent *rem;
 
 
 	if (argc < 2) { /* Check if server's port number is given */
@@ -192,7 +215,7 @@ char *token;
 				}
 				
 
-				printf("%s",buf);
+				//printf("%s",buf);
 
 
 				/** replace **/
@@ -212,26 +235,34 @@ char *token;
 						if (strcmp(token,"Connection:")==0) {token=strtok(NULL,s); connection=token;}
 						token=strtok(NULL,s);
 					}
-
-
-
-				//printf("file = %s\n",file);
-
-
-
-				//printf("connection = %s\n",connection);
-				char *msgtemp = msg_not_implemented();
-				//printf("TEST\n%s\n",msgtemp);
 				
-				//printf("Read string: %s\n", buf);
-				//reverse(buf); /* Reverse message */
 
+				char *msgtemp;
+				char *filetype;
+				char *filebuffer = fileContents(file);
+				//printf("FILEDATA = %s\n",filebuffer);
+				if (filebuffer==NULL) {msgtemp=msg_not_found();printf("NOT FOUND FILE: %s\n",file);}
+				else {
+				filetype=get_filetype(file);
 
-				if (write(newsock, msgtemp, strlen(msgtemp)) < 0) {/* Send message */
+				//printf("FILETYPE = %s\n",filetype);
+				msgtemp=msg_ok(filebuffer,connection,filetype);
+				printf("Get file %s\n",file);
+		
+				}
+
+				//printf("MESSAGE = %s\n",msgtemp);
+				
+				//if (filebuffer!=NULL){printf("Get file %s with size %d and message size %d\n",file,strlen(filebuffer),strlen(msgtemp));printf("msg = \n%s",filebuffer);}
+
+				if (write(newsock, msgtemp, strlen(msgtemp)+1) < 0) {/* Send message */
 					perror("write");
 					exit(1);
 				}
-
+				if (msgtemp!=NULL) free(msgtemp);
+				if (filetype!=NULL)free(filetype);
+				if (filebuffer!=NULL)free(filebuffer);
+				
 			} while (strcmp(buf, "dne") != 0); /*Finish on "end" message*/
 			close(newsock); /* Close socket */
 			exit(0);
@@ -239,12 +270,6 @@ char *token;
 	} /* end of while(1) */
 } /* end of main() */
 
-/* Function for reversing a string */
-void reverse(char *s) {
-	int c, i, j;
-	for (i = 0, j = strlen(s) - 1; i < j; i++, j--) {
-		c = s[i];
-		s[i] = s[j];
-		s[j] = c;
-	}
-}
+
+
+
