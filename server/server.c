@@ -15,8 +15,51 @@
 #include <string.h>
 #include <unistd.h>
 
-void reverse(char *);
 
+char *fileContents(char *path) {
+    FILE *fp;
+    long lSize;
+    char *buffer;
+
+    if (path[0] == '/')
+        memmove(path, path + 1, strlen(path));
+
+    fp = fopen(path, "rb");
+
+    if (!fp) {
+        return NULL;
+    }
+    fseek(fp, 0L, SEEK_END);
+    lSize = ftell(fp);
+    rewind(fp);
+
+/* allocate memory for entire content */
+    buffer = calloc(1, lSize + 1);
+    if (!buffer) {
+        fclose(fp);
+        fputs("memory alloc fails", stderr);
+        exit(1);
+    }
+
+/* copy the file into the buffer */
+    if (1 != fread(buffer, lSize, 1, fp)) {
+        fclose(fp);
+        free(buffer);
+        fputs("entire read fails", stderr);
+        exit(1);
+    }
+
+
+    //printf("\n\n %s",buffer);
+
+    fclose(fp);
+    // free(buffer);
+
+    return buffer;
+}
+
+
+void reverse(char *);
 
 char test[1024];
 const char s[2] = " ";
@@ -30,7 +73,7 @@ main(int argc, char *argv[]) {
     struct sockaddr *serverptr, *clientptr;
     struct hostent *rem;
     char *token;
-
+    char *contents;
 
     sprintf(test, "HTTP/1.0 200 OK\r\n");    //line:netp:servestatic:beginserve
     sprintf(test, "%sServer: Sysstatd Web Server\r\n", test);
@@ -130,24 +173,22 @@ main(int argc, char *argv[]) {
                         }
                         token = strtok(NULL, s);
                     }
-
-
                     printf("file = %s\n", file);
-
 
                     printf("connection = %s\n", connection);
 
-
                     //printf("Read string: %s\n", buf);
                     //reverse(buf); /* Reverse message */
-
 
                     if (write(newsock, test, sizeof(test)) < 0) {/* Send message */
                         perror("write");
                         exit(1);
                     }
+                    contents = fileContents(file);
+                    //puts(contents);
 
                 } while (strcmp(buf, "dne") != 0); /*Finish on "end" message*/
+
                 close(newsock); /* Close socket */
                 exit(0);
         } /* end of switch */
