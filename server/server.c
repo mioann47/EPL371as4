@@ -137,6 +137,14 @@ int main(int argc, char *argv[]) {
 				char *msgtemp = NULL;
 				char *filetype = NULL;
 				char *filebuffer = fileContents(file);
+
+
+			if (file[0] == '/')
+				memmove(file, file + 1, strlen(file));
+
+			struct stat fstat;
+			lstat(file, &fstat);
+
 				//printf("FILEDATA = %s\n",filebuffer);
 				if (filebuffer == NULL) {
 					msgtemp = msg_not_found();
@@ -145,19 +153,26 @@ int main(int argc, char *argv[]) {
 					filetype = get_filetype(file);
 
 					//printf("FILETYPE = %s\n",filetype);
-					msgtemp = msg_ok(filebuffer, connection, filetype);
+					msgtemp = msg_ok(filebuffer, connection, filetype,fstat.st_size);
 					printf("Get file %s\n", file);
 
 				}
 
-				//printf("MESSAGE = %s\n",msgtemp);
+				printf("MESSAGE = %s\n",msgtemp);
 
 				//if (filebuffer!=NULL){printf("Get file %s with size %d and message size %d\n",file,strlen(filebuffer),strlen(msgtemp));printf("msg = \n%s",filebuffer);}
-
-				if (write(newsock, msgtemp, strlen(msgtemp) + 1) < 0) {/* Send message */
+				
+				if (write(newsock, msgtemp, strlen(msgtemp)) < 0) {/* Send message */
 					perror("write");
 					exit(1);
 				}
+				if (filebuffer!=NULL){
+				if (write(newsock, filebuffer, fstat.st_size+1) < 0) {/* Send message */
+					perror("write");
+					exit(1);
+				}}
+
+
 				if (msgtemp != NULL)
 					free(msgtemp);
 				if (filetype != NULL)

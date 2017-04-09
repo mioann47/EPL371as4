@@ -7,6 +7,6 @@ char *msg_not_implemented();
 
 char *msg_not_found();
 
-char *msg_ok(char *contents, char *connection, char* filetype);
+char *msg_ok(char *contents, char *connection, char* filetype,int len);
 
 #endif

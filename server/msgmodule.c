@@ -16,16 +16,16 @@ char *msg_not_found() {
 	return tmp;
 }
 
-char *msg_ok(char *contents, char *connection, char* filetype) {
-	int len = strlen(contents);
-
-	char *temp = malloc(strlen(contents) + 200);
+char *msg_ok(char *contents, char *connection, char* filetype,int len) {
+	
+	
+	char *temp = malloc(200);
 	sprintf(temp, "HTTP/1.1 200 OK\r\n");    
 	sprintf(temp, "%sServer: EPL371_SERVER\r\n", temp);
 	sprintf(temp, "%sContent-length: %d\r\n", temp, len);
 	sprintf(temp, "%sConnection: %s\r\n", temp, connection);
 	sprintf(temp, "%sContent-type: %s\r\n\r\n", temp, filetype);
-	sprintf(temp, "%s%s", temp, contents);
+	//sprintf(temp, "%s%s", temp, contents);
 
 	return temp;
 }
