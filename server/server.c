@@ -136,21 +136,26 @@ int main(int argc, char *argv[]) {
 
 				char *msgtemp = NULL;
 				char *filetype = NULL;
-				char *filebuffer = fileContents(file);
 
 
+				char* path= (char*)malloc(strlen(file)+strlen(cfg->server_file_folder)+1);
+				strcpy(path,cfg->server_file_folder);
+				strcat(path,file);
+				char *filebuffer = fileContents(path);
+
+/*
 			if (file[0] == '/')
-				memmove(file, file + 1, strlen(file));
+				memmove(file, file + 1, strlen(file));*/
 
 			struct stat fstat;
-			lstat(file, &fstat);
+			lstat(path, &fstat);
 
 				//printf("FILEDATA = %s\n",filebuffer);
 				if (filebuffer == NULL) {
 					msgtemp = msg_not_found();
-					printf("NOT FOUND FILE: %s\n", file);
+					printf("NOT FOUND FILE: %s\n", path);
 				} else {
-					filetype = get_filetype(file);
+					filetype = get_filetype(path);
 
 					//printf("FILETYPE = %s\n",filetype);
 					msgtemp = msg_ok(filebuffer, connection, filetype,fstat.st_size);
@@ -166,6 +171,8 @@ int main(int argc, char *argv[]) {
 					perror("write");
 					exit(1);
 				}
+
+
 				if (filebuffer!=NULL){
 				if (write(newsock, filebuffer, fstat.st_size+1) < 0) {/* Send message */
 					perror("write");

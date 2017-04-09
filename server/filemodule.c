@@ -5,9 +5,9 @@ char *fileContents(char *path) {
 	long lSize;
 	char *buffer;
 
-	if (path[0] == '/')
-		memmove(path, path + 1, strlen(path));
-
+	/*if (path[0] == '/')
+		memmove(path, path + 1, strlen(path));*/
+	
 	fp = fopen(path, "rb");
 
 	if (!fp) {
@@ -36,6 +36,7 @@ char *fileContents(char *path) {
 	//printf("\n\n %s",buffer);
 
 	fclose(fp);
+	
 	// free(buffer);
 
 	return buffer;
