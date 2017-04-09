@@ -4,6 +4,7 @@
 #include "libs.h"
 #include "filemodule.h"
 #include "msgmodule.h"
+#include "configurations.h"
 
 //char test[1024];
 const char s[2] = " ";
@@ -14,6 +15,10 @@ const char s[2] = " ";
 char test[1024];
 int main(int argc, char *argv[]) {
 
+
+	CONFIG *cfg=(CONFIG*)malloc(sizeof(CONFIG));
+	readConfigurations(cfg);
+	
 	char *token;
 
 	sprintf(test, "HTTP/1.1 200 OK\r\n");    //line:netp:servestatic:beginserve
@@ -32,10 +37,10 @@ int main(int argc, char *argv[]) {
 	struct sockaddr *serverptr, *clientptr;
 	struct hostent *rem;
 
-	if (argc < 2) { /* Check if server's port number is given */
+	/*if (argc < 2) {
 		printf("Please give the port number \n");
 		exit(1);
-	}
+	}*/
 
 	/* Create socket */
 	if ((sock = socket(PF_INET, SOCK_STREAM, 0)) < 0) {
@@ -43,7 +48,7 @@ int main(int argc, char *argv[]) {
 		exit(1);
 	}
 	/* Convert port number to integer */
-	port = atoi(argv[1]);
+	port = cfg->port_number;
 	server.sin_family = PF_INET; /* Internet domain */
 	server.sin_addr.s_addr = htonl(INADDR_ANY); /* My Internet address */
 	server.sin_port = htons(port); /* The given port */
