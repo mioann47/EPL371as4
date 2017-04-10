@@ -2,7 +2,8 @@
 #define __FMOD_H__
 
 #include "libs.h"
-
+#include "configurations.h"
+#include "msgmodule.h"
 /**
  Return file contents
  **/
@@ -13,4 +14,6 @@ char *fileContents(char *path);
  **/
 char *get_filetype(char *filename);
 
+int getFileSize(char *path);
+void writeIntoSock(int newsock,char *buf,CONFIG *cfg);
 #endif

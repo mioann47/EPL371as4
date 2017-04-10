@@ -1,3 +1,6 @@
+#ifndef __CON_H__
+#define __CON_H__
+
 #include "libs.h"
 #include "jsmn.h"
 
@@ -17,3 +20,4 @@ int jsoneq(const char *json, jsmntok_t *tok, const char *s);
 
 
 void readConfigurations(CONFIG* cfg);
+#endif

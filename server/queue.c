@@ -1,27 +1,26 @@
 #include "queue.h"
 
 
-Queue *ConstructQueue(int limit) {
-    Queue *queue = (Queue*) malloc(sizeof (Queue));
-    if (queue == NULL) {
-        return NULL;
+void ConstructQueue(Queue** queue) {
+    *queue = (Queue*) malloc(sizeof (Queue));
+    if (*queue == NULL) {
+        return;
     }
-    if (limit <= 0) {
-        limit = 65535;
-    }
-    queue->limit = limit;
-    queue->size = 0;
-    queue->head = NULL;
-    queue->tail = NULL;
+    
+    (*queue)->limit = 65535;
+    (*queue)->size = 0;
+    (*queue)->head = NULL;
+    (*queue)->tail = NULL;
 
-    return queue;
+    
 }
 
 void DestructQueue(Queue *queue) {
-    NODE *pN;
+   // NODE *pN;
+	
     while (!isEmpty(queue)) {
-        pN = Dequeue(queue);
-        free(pN);
+       Dequeue(queue);
+       // free(pN);
     }
     free(queue);
 }
@@ -50,20 +49,22 @@ int Enqueue(Queue *pQueue, NODE *item) {
     return TRUE;
 }
 
-NODE * Dequeue(Queue *pQueue) {
+int Dequeue(Queue *pQueue) {
     /*the queue is empty or bad param*/
     NODE *item;
     if (isEmpty(pQueue))
-        return NULL;
+        return -1;
     item = pQueue->head;
     pQueue->head = (pQueue->head)->prev;
     pQueue->size--;
-    return item;
+	int temp=item->data;
+	free(item);
+    return temp;
 }
 
 int isEmpty(Queue* pQueue) {
     if (pQueue == NULL) {
-        return FALSE;
+        return -1;
     }
     if (pQueue->size == 0) {
         return TRUE;
@@ -77,7 +78,7 @@ int main() {
     int i;
     Queue *pQ = ConstructQueue(7);
     NODE *pN;
-
+	int x;
     for (i = 0; i < 9; i++) {
         pN = (NODE*) malloc(sizeof (NODE));
         pN->data = 100 + i;
@@ -85,9 +86,9 @@ int main() {
     }
 
     while (!isEmpty(pQ)) {
-        pN = Dequeue(pQ);
-        printf("\nDequeued: %d", pN->data);
-        free(pN);
+        x = Dequeue(pQ);
+        printf("\nDequeued: %d", x);
+        
     }
     DestructQueue(pQ);
     return (EXIT_SUCCESS);

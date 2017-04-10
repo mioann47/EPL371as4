@@ -19,9 +19,9 @@ typedef struct Queue {
     int limit;
 } Queue;
 
-Queue *ConstructQueue(int limit);
+void ConstructQueue(Queue **queue);
 void DestructQueue(Queue *queue);
 int Enqueue(Queue *pQueue, NODE *item);
-NODE *Dequeue(Queue *pQueue);
+int Dequeue(Queue *pQueue);
 int isEmpty(Queue* pQueue);
 

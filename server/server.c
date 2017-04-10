@@ -5,174 +5,40 @@
 #include "filemodule.h"
 #include "msgmodule.h"
 #include "configurations.h"
-
-//char test[1024];
-const char s[2] = " ";
-
-// function prototype for reversing func.
-/* Server with Internet stream sockets */
-
-int getFileSize(char *path){
-struct stat fstat;
-lstat(path, &fstat);
-return fstat.st_size;
-
-}
-
-void writeIntoSock(int newsock,char *buf,CONFIG *cfg){
-	
-				/** replace **/
-				char *p = buf;
-				while ((*p) != '\0') {
-					if ((*p) == '\r' && (*(p + 1)) == '\n') {
-						(*p) = ' ';
-						(*(p + 1)) = ' ';
-					}
-					p++;
-				}
-
-				/** TOKENIZER **/
-				char *token=NULL;
-				token = strtok(buf, s);
-				char *request=token;
-				
-				char *file = NULL;
-				char *connection = NULL;
+#include "queue.h"
 
 
 
-
-
-
-				while (token != NULL) {
-					if (strcmp(token, "GET") == 0       || strcmp(token, "HEAD") == 0 || strcmp(token, "DELETE") == 0) {
-						token = strtok(NULL, s);
-						file = token;
-					}
-
-					if (strcmp(token, "Connection:") == 0) {
-						token = strtok(NULL, s);
-						connection = token;
-					}
-					token = strtok(NULL, s);
-				}
-
-				
-				
-				if (connection==NULL){
-				connection="close";
-				}
-
-				char *msgtemp = NULL;
-
-				if (strcmp(request,"GET") == 0 || strcmp(request, "HEAD") == 0){
-
-				
-
-				
-
-				/*build new path*/
-				char* path= (char*)malloc(strlen(file)+strlen(cfg->server_file_folder)+1);
-				strcpy(path,cfg->server_file_folder);
-				strcat(path,file);
-
-				/*get contents*/
-				char *filebuffer = fileContents(path);
-				int fsize=getFileSize(path);
-
-
-				if (filebuffer == NULL) {
-					msgtemp = msg_not_found();
-					printf("NOT FOUND FILE: %s\n", file);
-				if (write(newsock, msgtemp, strlen(msgtemp)) < 0) {
-					perror("write");
-					exit(1);
-				}
-
-				if (msgtemp != NULL)
-					free(msgtemp);
-				} else {
-						
-					/*get filetype*/
-					char *filetype = NULL;
-					filetype = get_filetype(path);
-
-					/*get header*/
-					msgtemp = msg_ok(filebuffer, connection, filetype,fsize);
-					printf("%s file %s\n",request,file);
-
-				
-
-				
-				/* Send header */	
-				if (write(newsock, msgtemp, strlen(msgtemp)) < 0) {
-					perror("write");
-					exit(1);
-				}
-
-				/* Send contents */
-				if (strcmp(request,"GET") == 0){
-					if (write(newsock, filebuffer, fsize+1) < 0) {
-						perror("write");
-						exit(1);
-					}
-				}
-
-				
-				//free
-				if (msgtemp != NULL)
-					free(msgtemp);
-				if (filetype != NULL)
-					free(filetype);
-				if (filebuffer != NULL)
-					free(filebuffer);
-				if (path!=NULL)
-					free(path);
-				}
-			}else if (strcmp(request,"DELETE") == 0)  {
-
-                    FILE *fp;
-                    fp = fopen(file, "rb");
-
-                    if (!fp) {
-                        printf("HTTP/1.1 Not Found\n");
-                        //exit(0);
-                    }
-
-                    if (remove(file) == 0)
-                        printf("HTTP/1.1 200 OK\n");
-                    else
-                        printf("File deletion failed\n");
-
-
-                } else {
-                    printf("%s", msg_not_implemented());
-			/*not implemented code*/			
-			}
-
-}
 
 
 void *connection_handler(void *);
 
 
 
-typedef struct{
-CONFIG *cfg;
-int sock;
-}CONNECTION_INFO;
 
+
+
+Queue *qSock;
+
+pthread_mutex_t mutex;
+pthread_cond_t cond;
+int err;
 int main(int argc, char *argv[]) {
 
+	ConstructQueue(&qSock);
+	NODE *pN;
 
 	CONFIG *cfg=(CONFIG*)malloc(sizeof(CONFIG));
 	readConfigurations(cfg);
 	
-	int err;
+	
 	// error code 
-	pthread_t tid[40];
+	pthread_t tid[cfg->number_of_threads];
 	// Thread ID
+	
 
+
+	
 	
 
 	int newsock;
@@ -212,6 +78,19 @@ int main(int argc, char *argv[]) {
 	}
 	printf("Listening for connections to port %d\n", port);
 	int i=0;
+		
+	
+	for (i=0;i<cfg->number_of_threads;i++){
+		
+		if ((err = pthread_create( &tid[i], NULL, &connection_handler, (void*) cfg)   ) == 1) {
+
+			  exit(1);
+			}
+		
+		}
+
+	
+	
 	while (1) {
 		clientptr = (struct sockaddr *) &client;
 		clientlen = sizeof(client);
@@ -220,6 +99,18 @@ int main(int argc, char *argv[]) {
 			perror("accept");
 			exit(1);
 		}
+		
+		pN = (NODE*) malloc(sizeof (NODE));
+       		pN->data = newsock;
+       		Enqueue(qSock, pN);
+	
+		/* send signal to condition  */
+		if ((err = pthread_cond_signal(&cond)) ==TRUE) {
+			printf("pthread_cond_signal: %s\n",strerror(err));
+			exit(1);
+		}
+		
+
 		/* Using IP address find DNS name (i.e., reverse DNS)*/
 		if ((rem = gethostbyaddr((char *) &client.sin_addr.s_addr,
 				sizeof(client.sin_addr.s_addr), client.sin_family)) == NULL) {
@@ -227,41 +118,55 @@ int main(int argc, char *argv[]) {
 
 			exit(1);
 		}
-		printf("Accepted connection from %s %d\n", rem->h_name,newsock);
+		printf("Accepted connection from %s %d added to queue\n", rem->h_name,newsock);
 
 
-	CONNECTION_INFO *cinfo=(CONNECTION_INFO*) malloc(sizeof(CONNECTION_INFO));
-	cinfo->cfg=cfg;
-	cinfo->sock=newsock;
-			fprintf(stderr,"SOCK1 = %d\n",cinfo->sock);
 	
-
-
-
-
-		if ((err = pthread_create( &tid[i], NULL, &connection_handler, (void*) cinfo)   ) == 1) {
-
-			  exit(1);
-			}
 			
-		i++;		
+		
 		
 	//////////
 			
 	} /* end of while(1) */
 
 
-
+pthread_mutex_destroy(&mutex);
 
 } /* end of main() */
 
 
 
 void *connection_handler(void *cinfo1) {
-	// Get the socket descriptor
-CONNECTION_INFO *cinfo=  (CONNECTION_INFO*) cinfo1;
-CONFIG *cfg= cinfo->cfg;
-int newsock=cinfo->sock;
+
+
+
+while(1){
+if ((err = pthread_mutex_lock(&mutex))==TRUE) { /* lock mutex */
+printf("pthread_mutex_lock: %s\n",strerror(err));
+exit(1);
+}
+
+	while(isEmpty(qSock)){
+
+		// wait server to put a node in the queue
+		if ((err = pthread_cond_wait(&cond, &mutex))==TRUE) {
+			printf("pthread_cond_wait: %s\n",strerror(err));
+			exit(1);
+	}
+}
+
+
+
+int newsock=Dequeue(qSock);
+
+if ((err = pthread_mutex_unlock(&mutex))==TRUE) { /* unlock mutex */ 
+printf("pthread_mutex_unlock: %s\n",strerror(err));
+exit(1);
+}
+
+
+CONFIG *cfg=   (CONFIG*) cinfo1;
+
 
 
 printf("serving connection = %d\n",newsock);
@@ -275,13 +180,13 @@ char buf[2560];
 					perror("read");
 					exit(1);
 				}
-				if (strlen(buf)==0) { free(cinfo);
+				if (strlen(buf)==0) { 
 							close(newsock);
-							return NULL;}
+							continue;}
 				writeIntoSock(newsock,buf,cfg);
 
-free(cinfo);
+
 close(newsock);	
-return NULL;
+}
 }
 
