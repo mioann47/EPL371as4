@@ -130,8 +130,23 @@ void writeIntoSock(int newsock,char *buf,CONFIG *cfg){
 					free(path);
 				}
 			}else if (strcmp(request,"DELETE") == 0)  {
-			/*delete code*/
-			}else {
+
+                    FILE *fp;
+                    fp = fopen(file, "rb");
+
+                    if (!fp) {
+                        printf("HTTP/1.1 Not Found\n");
+                        //exit(0);
+                    }
+
+                    if (remove(file) == 0)
+                        printf("HTTP/1.1 200 OK\n");
+                    else
+                        printf("File deletion failed\n");
+
+
+                } else {
+                    printf("%s", msg_not_implemented());
 			/*not implemented code*/			
 			}
 

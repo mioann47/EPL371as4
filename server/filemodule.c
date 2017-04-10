@@ -5,8 +5,6 @@ char *fileContents(char *path) {
 	long lSize;
 	char *buffer;
 
-	/*if (path[0] == '/')
-		memmove(path, path + 1, strlen(path));*/
 	
 	fp = fopen(path, "rb");
 
@@ -60,3 +58,7 @@ char *get_filetype(char *filename) {
 	return temp;
 }
 
+char *telHead() {
+
+
+}
