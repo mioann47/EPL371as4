@@ -239,7 +239,7 @@ int main(int argc, char *argv[]) {
 
 
 
-		if (err = pthread_create( &tid[i], NULL, &connection_handler, (void*) cinfo)) {
+		if ((err = pthread_create( &tid[i], NULL, &connection_handler, (void*) cinfo)   ) == 1) {
 
 			  exit(1);
 			}
@@ -277,10 +277,11 @@ char buf[2560];
 				}
 				if (strlen(buf)==0) { free(cinfo);
 							close(newsock);
-							return;}
+							return NULL;}
 				writeIntoSock(newsock,buf,cfg);
 
 free(cinfo);
 close(newsock);	
+return NULL;
 }
 
