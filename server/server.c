@@ -153,20 +153,32 @@ void writeIntoSock(int newsock,char *buf,CONFIG *cfg){
 }
 
 
+void *connection_handler(void *);
+
+
+
+typedef struct{
+CONFIG *cfg;
+int sock;
+}CONNECTION_INFO;
+
 int main(int argc, char *argv[]) {
 
 
 	CONFIG *cfg=(CONFIG*)malloc(sizeof(CONFIG));
 	readConfigurations(cfg);
 	
-	
+	int err;
+	// error code 
+	pthread_t tid[40];
+	// Thread ID
 
 	
 
 	int newsock;
 	int port, sock, serverlen;
 	unsigned int clientlen;
-	char buf[2560];
+	
 	struct sockaddr_in server, client;
 	struct sockaddr *serverptr, *clientptr;
 	struct hostent *rem;
@@ -199,7 +211,7 @@ int main(int argc, char *argv[]) {
 		exit(1);
 	}
 	printf("Listening for connections to port %d\n", port);
-
+	int i=0;
 	while (1) {
 		clientptr = (struct sockaddr *) &client;
 		clientlen = sizeof(client);
@@ -215,27 +227,60 @@ int main(int argc, char *argv[]) {
 
 			exit(1);
 		}
-		printf("Accepted connection from %s\n", rem->h_name);
+		printf("Accepted connection from %s %d\n", rem->h_name,newsock);
 
-		/* Create child for serving the client */
-		switch (fork()) {
-		case -1:
-			perror("fork");
-			exit(1);
-		case 0: /* Child process */
-			do {
-				bzero(buf, sizeof(buf)); /* Initialize buffer */
-				if (read(newsock, buf, sizeof(buf)) < 0) { /* Get message */
+
+	CONNECTION_INFO *cinfo=(CONNECTION_INFO*) malloc(sizeof(CONNECTION_INFO));
+	cinfo->cfg=cfg;
+	cinfo->sock=newsock;
+			fprintf(stderr,"SOCK1 = %d\n",cinfo->sock);
+	
+
+
+
+
+		if (err = pthread_create( &tid[i], NULL, &connection_handler, (void*) cinfo)) {
+
+			  exit(1);
+			}
+			
+		i++;		
+		
+	//////////
+			
+	} /* end of while(1) */
+
+
+
+
+} /* end of main() */
+
+
+
+void *connection_handler(void *cinfo1) {
+	// Get the socket descriptor
+CONNECTION_INFO *cinfo=  (CONNECTION_INFO*) cinfo1;
+CONFIG *cfg= cinfo->cfg;
+int newsock=cinfo->sock;
+
+
+printf("serving connection = %d\n",newsock);
+
+
+
+
+char buf[2560];
+				bzero(buf, sizeof(buf)); 
+				if (read(newsock, buf, sizeof(buf)) < 0) { 
 					perror("read");
 					exit(1);
 				}
-
+				if (strlen(buf)==0) { free(cinfo);
+							close(newsock);
+							return;}
 				writeIntoSock(newsock,buf,cfg);
 
-			} while (strcmp(buf, "dne") != 0); /*Finish on "end" message*/
-			close(newsock); /* Close socket */
-			exit(0);
-		} /* end of switch */
-	} /* end of while(1) */
-} /* end of main() */
+free(cinfo);
+close(newsock);	
+}
 

@@ -10,7 +10,7 @@ CC   = gcc            # name of compiler
 DOXYGEN = doxygen        # name of doxygen binary
 # define any compile-time flags
 CFLAGS = -std=gnu99 -Wall -O -Wuninitialized -g -pedantic   # there is a space at the end of this
-LFLAGS = -lm                                          
+LFLAGS = -lm -pthread                                          
 ###############################################
 # You don't need to edit anything below this line
 ###############################################
