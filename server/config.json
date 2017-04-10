@@ -1,5 +1,5 @@
 {
-  "port": 8085,
+  "port": 8080,
  "threads": 40,
-  "folder": "files"
+  "folder": "SERVER_FILES"
 }
