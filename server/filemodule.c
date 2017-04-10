@@ -41,7 +41,7 @@ char *fileContents(char *path) {
 }
 
 char *get_filetype(char *filename) {
-    char *temp = malloc(20);
+    char *temp = malloc(31);
     if (strstr(filename, ".html") || strstr(filename, ".htm"))
         strcpy(temp, "text/html");
     else if (strstr(filename, ".gif"))
@@ -57,11 +57,10 @@ char *get_filetype(char *filename) {
     else if (strstr(filename, ".txt") || strstr(filename, ".sed") || strstr(filename, ".awk") ||
              strstr(filename, ".c") || strstr(filename, ".h"))
         strcpy(temp, "text/plain");
-    else strcpy(temp, "application/octet-stream");
+
+    else
+        strcpy(temp, "application/octet-stream");
+
     return temp;
 }
 
-char *telHead() {
-
-
-}
