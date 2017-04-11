@@ -129,8 +129,8 @@ int main(int argc, char *argv[]) {
 
 
 void *connection_handler(void *cinfo1) {
-
-
+int x=1;
+int newsock;
     while (1) {
         if ((err = pthread_mutex_lock(&mutex)) == TRUE) { /* lock mutex */
             printf("pthread_mutex_lock: %s\n", strerror(err));
@@ -147,7 +147,7 @@ void *connection_handler(void *cinfo1) {
         }
 
 
-        int newsock = Dequeue(qSock);
+        newsock = Dequeue(qSock);
 
         if ((err = pthread_mutex_unlock(&mutex)) == TRUE) { /* unlock mutex */
             printf("pthread_mutex_unlock: %s\n", strerror(err));
@@ -160,20 +160,23 @@ void *connection_handler(void *cinfo1) {
 
         printf("serving connection = %d\n", newsock);
 
-
+	do{
         char buf[2560];
         bzero(buf, sizeof(buf));
         if (read(newsock, buf, sizeof(buf)) < 0) {
             perror("read");
-            exit(1);
+            x=0;
+	    break;
         }
         if (strlen(buf) == 0) {
             close(newsock);
-            continue;
+            x=0;
+	    break;
         }
-        writeIntoSock(newsock, buf, cfg);
+        x=writeIntoSock(newsock, buf, cfg);
 
-
+}while(x==1);
+	//printf("CLosing socket number
         close(newsock);
 
     }

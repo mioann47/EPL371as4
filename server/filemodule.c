@@ -11,15 +11,14 @@ char *fileContents(char *path) {
     if (!fp) {
         return NULL;
     }
-    fseek(fp, 0L, SEEK_END);
-    lSize = ftell(fp);
-    rewind(fp);
+    
+    lSize = getFileSize(path);
 
     /* allocate memory for entire content */
     buffer = calloc(1, lSize + 1);
     if (!buffer) {
         fclose(fp);
-        fputs("memory alloc fails", stderr);
+        fputs("memory alloc fails\n", stderr);
         exit(1);
     }
 
@@ -27,7 +26,7 @@ char *fileContents(char *path) {
     if (1 != fread(buffer, lSize, 1, fp)) {
         fclose(fp);
         free(buffer);
-        fputs("entire read fails", stderr);
+        fputs("entire read fails\n", stderr);
         exit(1);
     }
 
@@ -73,9 +72,34 @@ return fstat.st_size;
 }
 
 
+static int checkConnection(char * con){
+if (strlen(con)==10){
+	
+if (
+( (con[0]=='k' || con[0]=='K') ) &&
+(con[1]=='e') && 
+(con[2]=='e') && 
+(con[3]=='p') && 
+(con[4]=='-') &&
+( (con[5]=='a') || (con[5]=='A') ) &&
+(con[6]=='l') &&
+(con[7]=='i') &&
+(con[8]=='v') &&
+(con[9]=='e')
+)
+return 1;
+}
 
 
-void writeIntoSock(int newsock,char *buf,CONFIG *cfg){
+
+
+
+return 0;
+}
+
+
+
+int writeIntoSock(int newsock,char *buf,CONFIG *cfg){
 	const char s[2] = " ";
 				/** replace **/
 				char *p = buf;
@@ -91,19 +115,53 @@ void writeIntoSock(int newsock,char *buf,CONFIG *cfg){
 				char *token=NULL;
 				token = strtok(buf, s);
 				char *request=token;
-				
+				char *msgtemp = NULL;
 				char *file = NULL;
 				char *connection = NULL;
+	
 
 
 
+							
+							if (request == NULL) {
+									if (connection == NULL){
+										connection="close";
+									}
 
+							msgtemp=msg_bad_request(connection);
+								if (write(newsock, msgtemp, strlen(msgtemp)) < 0) {
+									perror("write");
+									return 0;
+								}
 
+							if (msgtemp != NULL) free(msgtemp);
+
+							return checkConnection(connection);/////check connection
+							
+							}
+
+				
 
 				while (token != NULL) {
 					if (strcmp(token, "GET") == 0       || strcmp(token, "HEAD") == 0 || strcmp(token, "DELETE") == 0) {
 						token = strtok(NULL, s);
 						file = token;
+
+
+							if (file ==NULL) { 
+									if (connection == NULL){
+										connection="close";
+									}
+								msgtemp=msg_bad_request(connection);
+								if (write(newsock, msgtemp, strlen(msgtemp)) < 0) {
+									perror("write");
+									return 0;
+								}
+
+								if (msgtemp != NULL) free(msgtemp);
+
+							return checkConnection(connection);}//////check connection
+								
 					}
 
 					if (strcmp(token, "Connection:") == 0) {
@@ -119,7 +177,7 @@ void writeIntoSock(int newsock,char *buf,CONFIG *cfg){
 				connection="close";
 				}
 
-				char *msgtemp = NULL;
+				
 
 				if (strcmp(request,"GET") == 0 || strcmp(request, "HEAD") == 0){
 
@@ -138,17 +196,16 @@ void writeIntoSock(int newsock,char *buf,CONFIG *cfg){
 
 
 				if (filebuffer == NULL) {
-                    msgtemp = msg_not_found(connection);
-					printf("NOT FOUND FILE: %s\n", file);
+					msgtemp = msg_not_found(connection);
+					
 				if (write(newsock, msgtemp, strlen(msgtemp)) < 0) {
 					perror("write");
-					exit(1);
+					return 0;
 				}
-                    /*   if (strcmp(connection,"close")==0)
-                       close(newsock);*/
 
-                    if (msgtemp != NULL)
+				if (msgtemp != NULL)
 					free(msgtemp);
+				return checkConnection(connection);///check connection
 				} else {
 						
 					/*get filetype*/
@@ -157,7 +214,7 @@ void writeIntoSock(int newsock,char *buf,CONFIG *cfg){
 
 					/*get header*/
 					msgtemp = msg_ok(filebuffer, connection, filetype,fsize);
-					printf("%s file %s\n",request,file);
+					//printf("%s file %s\n",request,file);
 
 				
 
@@ -165,20 +222,19 @@ void writeIntoSock(int newsock,char *buf,CONFIG *cfg){
 				/* Send header */	
 				if (write(newsock, msgtemp, strlen(msgtemp)) < 0) {
 					perror("write");
-					exit(1);
+					return 0;
 				}
 
 				/* Send contents */
 				if (strcmp(request,"GET") == 0){
 					if (write(newsock, filebuffer, fsize+1) < 0) {
 						perror("write");
-						exit(1);
+						return 0;
 					}
 				}
-                    /* if (strcmp(connection,"close")==0)
-                     close(newsock);*/
 
-                    //free
+				
+				//free
 				if (msgtemp != NULL)
 					free(msgtemp);
 				if (filetype != NULL)
@@ -188,24 +244,47 @@ void writeIntoSock(int newsock,char *buf,CONFIG *cfg){
 				if (path!=NULL)
 					free(path);
 				}
+				return checkConnection(connection);///check connection
 			}else if (strcmp(request,"DELETE") == 0)  {
 
                     FILE *fp;
                     fp = fopen(file, "rb");
 
                     if (!fp) {
-                        printf("HTTP/1.1 Not Found\n");
-                        //exit(0);
+                        //printf("HTTP/1.1 Not Found\n");
+
+			msgtemp=msg_not_found(connection);
+                        if (write(newsock, msgtemp, strlen(msgtemp)) < 0) {
+					perror("write");
+					return 0;
+				}
+
                     }
 
-                    if (remove(file) == 0)
-                        printf("HTTP/1.1 200 OK\n");
-                    else
-                        printf("File deletion failed\n");
+                    if (remove(file) == 0){
+                        msgtemp=msg_deleted_ok(connection);
+                        if (write(newsock, msgtemp, strlen(msgtemp)) < 0) {
+					perror("write");
+					return 0;
+				}
+                    }else{
+                        msgtemp=msg_deleted_ok(connection);
+                        if (write(newsock, msgtemp, strlen(msgtemp)) < 0) {
+					perror("write");
+					return 0;
+				}}
+		fclose(fp);
 
-
+		return checkConnection(connection);///check connection
                 } else {
-                    printf("%s", msg_not_implemented(connection));
+                    //printf("%s", msg_not_implemented(connection));
+
+			msgtemp=msg_not_implemented(connection);
+                        if (write(newsock, msgtemp, strlen(msgtemp)) < 0) {
+					perror("write");
+					return 0;
+				}
+			return checkConnection(connection);///check connection
 			/*not implemented code*/			
 			}
 
