@@ -17,7 +17,7 @@ Chrystalla Chrysostomou
 
 ############################################################################################
 
-Instructions on how to use the server are provided in this README file.
+##Instructions on how to use the server are provided in this README file.
 
 ############################################################################################
 
