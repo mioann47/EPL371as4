@@ -138,14 +138,16 @@ void writeIntoSock(int newsock,char *buf,CONFIG *cfg){
 
 
 				if (filebuffer == NULL) {
-					msgtemp = msg_not_found();
+                    msgtemp = msg_not_found(connection);
 					printf("NOT FOUND FILE: %s\n", file);
 				if (write(newsock, msgtemp, strlen(msgtemp)) < 0) {
 					perror("write");
 					exit(1);
 				}
+                    /*   if (strcmp(connection,"close")==0)
+                       close(newsock);*/
 
-				if (msgtemp != NULL)
+                    if (msgtemp != NULL)
 					free(msgtemp);
 				} else {
 						
@@ -173,9 +175,10 @@ void writeIntoSock(int newsock,char *buf,CONFIG *cfg){
 						exit(1);
 					}
 				}
+                    /* if (strcmp(connection,"close")==0)
+                     close(newsock);*/
 
-				
-				//free
+                    //free
 				if (msgtemp != NULL)
 					free(msgtemp);
 				if (filetype != NULL)
@@ -202,7 +205,7 @@ void writeIntoSock(int newsock,char *buf,CONFIG *cfg){
 
 
                 } else {
-                    printf("%s", msg_not_implemented());
+                    printf("%s", msg_not_implemented(connection));
 			/*not implemented code*/			
 			}
 

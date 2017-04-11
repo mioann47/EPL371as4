@@ -3,9 +3,9 @@
 
 #include "libs.h"
 
-char *msg_not_implemented();
+char *msg_not_implemented(char *con);
 
-char *msg_not_found();
+char *msg_not_found(char *con);
 
 char *msg_ok(char *contents, char *connection, char* filetype,int len);
 
