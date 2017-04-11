@@ -18,7 +18,9 @@ After configuring the config.json file you can "run" the server by executing the
 into terminal, then you can open any browser (Mozilla Firefox , Google Chrome , Safari)
 and make a GET request. At address bar you shall write " localhost:<port>/<file>"
 
+```
 e.g localhost:8080/index.html
+```
 
 You can open multiple tabs and make multiple GET requests as described above.
 
