@@ -1,25 +1,15 @@
 # EPL371as4
 
-
-############################################################################################
-#######################################Contributors#########################################
+## Contributors
 ```
 Andreas Charalampous
 Modestos Ioannou
 Chrystalla Chrysostomou
 ```
 
-############################################################################################
 
-
-
-
-
-############################################################################################
 
 ### Instructions on how to use the server are provided in this README file.
-
-############################################################################################
 
 You can compile the program using "make" into terminal.Config.json file includes the parameters
 for using the program. It contains the port, the number of threads and the source folder.
