@@ -26,7 +26,7 @@ char *fileContents(char *path) {
     if (1 != fread(buffer, lSize, 1, fp)) {
         fclose(fp);
         free(buffer);
-        fputs("entire read fails\n", stderr);
+        fputs("1entire read fails\n", stderr);
         exit(1);
     }
 
@@ -87,17 +87,21 @@ if (
 (con[8]=='v') &&
 (con[9]=='e')
 )
-return 1;
+return TRUE;//alive
 }
 
 
-
-
-
-return 0;
+return FALSE;
 }
 
 
+static int isFile(char *path){
+struct stat fstat;
+lstat(path, &fstat);
+return S_ISREG(fstat.st_mode);
+
+
+}
 
 int writeIntoSock(int newsock,char *buf,CONFIG *cfg){
 	const char s[2] = " ";
@@ -131,7 +135,7 @@ int writeIntoSock(int newsock,char *buf,CONFIG *cfg){
 							msgtemp=msg_bad_request(connection);
 								if (write(newsock, msgtemp, strlen(msgtemp)) < 0) {
 									perror("write");
-									return 0;
+									return FALSE;
 								}
 
 							if (msgtemp != NULL) free(msgtemp);
@@ -148,14 +152,14 @@ int writeIntoSock(int newsock,char *buf,CONFIG *cfg){
 						file = token;
 
 
-							if (file ==NULL) { 
+							if (file ==NULL ) { 
 									if (connection == NULL){
 										connection="close";
 									}
 								msgtemp=msg_bad_request(connection);
 								if (write(newsock, msgtemp, strlen(msgtemp)) < 0) {
 									perror("write");
-									return 0;
+									return FALSE;
 								}
 
 								if (msgtemp != NULL) free(msgtemp);
@@ -190,6 +194,21 @@ int writeIntoSock(int newsock,char *buf,CONFIG *cfg){
 				strcpy(path,cfg->server_file_folder);
 				strcat(path,file);
 
+				if (isFile(path)==FALSE){
+					msgtemp=msg_bad_request(connection);	
+						if (write(newsock, msgtemp, strlen(msgtemp)) < 0) {
+									perror("write");
+									return FALSE;
+								}
+
+								if (msgtemp != NULL) free(msgtemp);
+
+							return checkConnection(connection);//////check connection
+				}
+
+				
+
+
 				/*get contents*/
 				char *filebuffer = fileContents(path);
 				int fsize=getFileSize(path);
@@ -200,7 +219,7 @@ int writeIntoSock(int newsock,char *buf,CONFIG *cfg){
 					
 				if (write(newsock, msgtemp, strlen(msgtemp)) < 0) {
 					perror("write");
-					return 0;
+					return FALSE;
 				}
 
 				if (msgtemp != NULL)
@@ -222,14 +241,14 @@ int writeIntoSock(int newsock,char *buf,CONFIG *cfg){
 				/* Send header */	
 				if (write(newsock, msgtemp, strlen(msgtemp)) < 0) {
 					perror("write");
-					return 0;
+					return FALSE;
 				}
 
 				/* Send contents */
 				if (strcmp(request,"GET") == 0){
 					if (write(newsock, filebuffer, fsize+1) < 0) {
 						perror("write");
-						return 0;
+						return FALSE;
 					}
 				}
 
@@ -256,7 +275,7 @@ int writeIntoSock(int newsock,char *buf,CONFIG *cfg){
 			msgtemp=msg_not_found(connection);
                         if (write(newsock, msgtemp, strlen(msgtemp)) < 0) {
 					perror("write");
-					return 0;
+					return FALSE;
 				}
 
                     }
@@ -265,13 +284,13 @@ int writeIntoSock(int newsock,char *buf,CONFIG *cfg){
                         msgtemp=msg_deleted_ok(connection);
                         if (write(newsock, msgtemp, strlen(msgtemp)) < 0) {
 					perror("write");
-					return 0;
+					return FALSE;
 				}
                     }else{
                         msgtemp=msg_deleted_ok(connection);
                         if (write(newsock, msgtemp, strlen(msgtemp)) < 0) {
 					perror("write");
-					return 0;
+					return FALSE;
 				}}
 		fclose(fp);
 
@@ -282,7 +301,7 @@ int writeIntoSock(int newsock,char *buf,CONFIG *cfg){
 			msgtemp=msg_not_implemented(connection);
                         if (write(newsock, msgtemp, strlen(msgtemp)) < 0) {
 					perror("write");
-					return 0;
+					return FALSE;
 				}
 			return checkConnection(connection);///check connection
 			/*not implemented code*/			

@@ -129,9 +129,9 @@ int main(int argc, char *argv[]) {
 
 
 void *connection_handler(void *cinfo1) {
-int x=1;
+int x=TRUE;
 int newsock;
-    while (1) {
+    while (TRUE) {
         if ((err = pthread_mutex_lock(&mutex)) == TRUE) { /* lock mutex */
             printf("pthread_mutex_lock: %s\n", strerror(err));
             exit(1);
@@ -165,17 +165,17 @@ int newsock;
         bzero(buf, sizeof(buf));
         if (read(newsock, buf, sizeof(buf)) < 0) {
             perror("read");
-            x=0;
+            x=FALSE;
 	    break;
         }
         if (strlen(buf) == 0) {
             close(newsock);
-            x=0;
+            x=FALSE;
 	    break;
         }
         x=writeIntoSock(newsock, buf, cfg);
 
-}while(x==1);
+}while(x==TRUE);
 	//printf("CLosing socket number
         close(newsock);
 
