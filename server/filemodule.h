@@ -15,5 +15,5 @@ char *fileContents(char *path);
 char *get_filetype(char *filename);
 
 int getFileSize(char *path);
-int writeIntoSock(int newsock,char *buf,CONFIG *cfg);
+int writeIntoSock(int newsock, char *buf, CONFIG *cfg);
 #endif

@@ -16,6 +16,8 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include <pthread.h>
+#include <signal.h>
+#include <errno.h>
 #define TRUE  1
 #define FALSE	0
 #endif
