@@ -6,7 +6,7 @@ Andreas Charalampous
 Modestos Ioannou
 Chrystalla Chrysostomou
 ```
-
+See also the list of [contributors](https://github.com/mioann47/EPL371as4) who participated in this project.
 
 
 ### Instructions on how to use the server are provided in this README file.
