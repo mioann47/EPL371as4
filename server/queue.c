@@ -2,9 +2,10 @@
 
 void ConstructQueue(Queue** queue) {
 	*queue = (Queue*) malloc(sizeof(Queue));
-	if (*queue == NULL) {
-		return;
-	}
+	if (*queue==NULL){
+			perror("malloc");
+			exit(EXIT_FAILURE);
+			}
 
 	(*queue)->limit = 65535;
 	(*queue)->size = 0;
@@ -71,7 +72,7 @@ int isEmpty(Queue* pQueue) {
 	}
 }
 
-/*
+#ifdef DEBUG
  int main() {
  int i;
  Queue *pQ = ConstructQueue(7);
@@ -90,4 +91,5 @@ int isEmpty(Queue* pQueue) {
  }
  DestructQueue(pQ);
  return (EXIT_SUCCESS);
- }*/
+ }
+#endif

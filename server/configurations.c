@@ -38,10 +38,10 @@ void readConfigurations(CONFIG* cfg) {
 		exit(1);
 	}
 
-	//printf("\n\n %s",JSON_STRING);
+	
 
 	fclose(fp);
-	// free(buffer);
+	
 
 	char* temp;
 	int i;
@@ -68,6 +68,10 @@ void readConfigurations(CONFIG* cfg) {
 		if (jsoneq(JSON_STRING, &t[i], "port") == 0) {
 
 			temp = (char*) malloc(100);
+				if (temp==NULL){
+			perror("malloc");
+			exit(EXIT_FAILURE);
+			}
 			sprintf(temp, "%.*s", t[i + 1].end - t[i + 1].start,
 					JSON_STRING + t[i + 1].start);
 			cfg->port_number = atoi(temp);
@@ -77,6 +81,10 @@ void readConfigurations(CONFIG* cfg) {
 		} else if (jsoneq(JSON_STRING, &t[i], "threads") == 0) {
 
 			temp = (char*) malloc(100);
+				if (temp==NULL){
+			perror("malloc");
+			exit(EXIT_FAILURE);
+			}
 			sprintf(temp, "%.*s", t[i + 1].end - t[i + 1].start,
 					JSON_STRING + t[i + 1].start);
 			cfg->number_of_threads = atoi(temp);
@@ -86,6 +94,10 @@ void readConfigurations(CONFIG* cfg) {
 		} else if (jsoneq(JSON_STRING, &t[i], "folder") == 0) {
 
 			temp = (char*) malloc(100);
+				if (temp==NULL){
+			perror("malloc");
+			exit(EXIT_FAILURE);
+			}
 			sprintf(temp, "%.*s", t[i + 1].end - t[i + 1].start,
 					JSON_STRING + t[i + 1].start);
 
@@ -101,11 +113,4 @@ void readConfigurations(CONFIG* cfg) {
 		}
 	}
 }
-/*
- int main() {
 
- printf("- port: %d\n", cfg->port_number);
- printf("- threads: %d\n",cfg->number_of_threads);
- printf("- folder: %s\n", cfg->server_file_folder);
- return EXIT_SUCCESS;
- }*/

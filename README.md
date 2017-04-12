@@ -12,8 +12,8 @@ See also the list of [contributors](https://github.com/mioann47/EPL371as4/contri
 
 ### Instructions on how to use the server are provided in this README file.
 You can compile the program using "make" into terminal. Config.json file includes the parameters
-for executing the program. It contains the port, the number of threads and the source folder.
-All these parameters can change at any time by editing the file .
+for executing the program. It contains the port, the number of threads and the server folder (where the server files are stored).
+All these parameters can change at any time by editing the file before running the server.
 
 After configuring the config.json file you can "run" the server by executing the "./s" command 
 into terminal, then you can open any browser (Mozilla Firefox , Google Chrome , Safari)

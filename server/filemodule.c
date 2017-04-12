@@ -17,29 +17,30 @@ char *fileContents(char *path) {
 	buffer = calloc(1, lSize + 1);
 	if (!buffer) {
 		fclose(fp);
-		fputs("memory alloc fails\n", stderr);
-		exit(1);
+		perror("calloc buffer");
+		exit(EXIT_FAILURE);
 	}
 
 	/* copy the file into the buffer */
 	if (1 != fread(buffer, lSize, 1, fp)) {
 		fclose(fp);
 		free(buffer);
-		fputs("1entire read fails\n", stderr);
-		exit(1);
+		perror("fread");
+		exit(EXIT_FAILURE);
 	}
 
-	//printf("\n\n %s",buffer);
 
 	fclose(fp);
-
-	// free(buffer);
 
 	return buffer;
 }
 
 char *get_filetype(char *filename) {
 	char *temp = malloc(31);
+			if (temp==NULL){
+			perror("malloc");
+			exit(EXIT_FAILURE);
+			}
 	if (strstr(filename, ".html") || strstr(filename, ".htm"))
 		strcpy(temp, "text/html");
 	else if (strstr(filename, ".gif"))
@@ -83,10 +84,10 @@ static int checkConnection(char * con) {
 	return FALSE;
 }
 
-static int isFile(char *path) {
+static int isFolder(char *path) {
 	struct stat fstat;
 	lstat(path, &fstat);
-	return S_ISREG(fstat.st_mode);
+	return S_ISDIR(fstat.st_mode);
 
 }
 
@@ -124,16 +125,16 @@ int writeIntoSock(int newsock, char *buf, CONFIG *cfg) {
 		if (msgtemp != NULL)
 			free(msgtemp);
 
-		return checkConnection(connection); /////check connection
+		return checkConnection(connection); //check connection
 
 	}
-
+	int implementedFunction = FALSE;
 	while (token != NULL) {
 		if (strcmp(token, "GET") == 0 || strcmp(token, "HEAD") == 0
 				|| strcmp(token, "DELETE") == 0) {
 			token = strtok(NULL, s);
 			file = token;
-
+			implementedFunction = TRUE;
 			if (file == NULL) {
 				if (connection == NULL) {
 					connection = "close";
@@ -148,11 +149,11 @@ int writeIntoSock(int newsock, char *buf, CONFIG *cfg) {
 					free(msgtemp);
 
 				return checkConnection(connection);
-			} //////check connection
+			} //check connection
 
 		}
 
-		if (strcmp(token, "Connection:") == 0) {
+		if (implementedFunction && strcmp(token, "Connection:") == 0) {
 			token = strtok(NULL, s);
 			connection = token;
 		}
@@ -168,10 +169,14 @@ int writeIntoSock(int newsock, char *buf, CONFIG *cfg) {
 		/*build new path*/
 		char* path = (char*) malloc(
 				strlen(file) + strlen(cfg->server_file_folder) + 1);
+			if (path==NULL){
+			perror("malloc");
+			exit(EXIT_FAILURE);
+			}
 		strcpy(path, cfg->server_file_folder);
 		strcat(path, file);
 
-		if (isFile(path) == FALSE) {
+		if (isFolder(path)) {
 			msgtemp = msg_bad_request(connection);
 			if (write(newsock, msgtemp, strlen(msgtemp)) < 0) {
 				perror("write");
@@ -181,7 +186,7 @@ int writeIntoSock(int newsock, char *buf, CONFIG *cfg) {
 			if (msgtemp != NULL)
 				free(msgtemp);
 
-			return checkConnection(connection); //////check connection
+			return checkConnection(connection); //check connection
 		}
 
 		/*get contents*/
@@ -198,7 +203,7 @@ int writeIntoSock(int newsock, char *buf, CONFIG *cfg) {
 
 			if (msgtemp != NULL)
 				free(msgtemp);
-			return checkConnection(connection); ///check connection
+			return checkConnection(connection); //check connection
 		} else {
 
 			/*get filetype*/
@@ -207,7 +212,7 @@ int writeIntoSock(int newsock, char *buf, CONFIG *cfg) {
 
 			/*get header*/
 			msgtemp = msg_ok(filebuffer, connection, filetype, fsize);
-			//printf("%s file %s\n",request,file);
+			
 
 			/* Send header */
 			if (write(newsock, msgtemp, strlen(msgtemp)) < 0) {
@@ -233,15 +238,14 @@ int writeIntoSock(int newsock, char *buf, CONFIG *cfg) {
 			if (path != NULL)
 				free(path);
 		}
-		return checkConnection(connection); ///check connection
+		return checkConnection(connection); //check connection
 	} else if (strcmp(request, "DELETE") == 0) {
 
 		FILE *fp;
 		fp = fopen(file, "rb");
 
 		if (!fp) {
-			//printf("HTTP/1.1 Not Found\n");
-
+			
 			msgtemp = msg_not_found(connection);
 			if (write(newsock, msgtemp, strlen(msgtemp)) < 0) {
 				perror("write");
@@ -264,18 +268,21 @@ int writeIntoSock(int newsock, char *buf, CONFIG *cfg) {
 			}
 		}
 		fclose(fp);
-
-		return checkConnection(connection); ///check connection
+		if (msgtemp != NULL)
+				free(msgtemp);
+		return checkConnection(connection); //check connection
 	} else {
-		//printf("%s", msg_not_implemented(connection));
-
+		
+		
 		msgtemp = msg_not_implemented(connection);
 		if (write(newsock, msgtemp, strlen(msgtemp)) < 0) {
 			perror("write");
 			return FALSE;
 		}
-		return checkConnection(connection); ///check connection
-		/*not implemented code*/
+		if (msgtemp != NULL)
+				free(msgtemp);
+		return checkConnection(connection); //check connection
+		
 	}
 
 }

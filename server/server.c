@@ -1,6 +1,4 @@
-/* File: 
- server.c
- */
+
 #include "libs.h"
 #include "filemodule.h"
 #include "msgmodule.h"
@@ -17,14 +15,18 @@ int err;
 
 int main(int argc, char *argv[]) {
 	/* Install signal handler */
-	
+	signal(SIGINT, signal_handler); 
 
 	ConstructQueue(&qSock);
 	NODE *pN;
 
 	CONFIG *cfg = (CONFIG *) malloc(sizeof(CONFIG));
+			if (cfg==NULL){
+			perror("malloc");	
+			exit(EXIT_FAILURE);		
+			}
 	readConfigurations(cfg);
-	signal(SIGINT, signal_handler); 
+	
 	
 	// Thread ID
 	pthread_t tid[cfg->number_of_threads];
@@ -43,6 +45,16 @@ int main(int argc, char *argv[]) {
 		perror("socket");
 		exit(1);
 	}
+
+
+	int reuse= 1;
+	if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (char *)&reuse, sizeof(int))< 0) {
+	perror("setsockopt");
+	exit(1);
+	}	
+
+
+
 	/* Convert port number to integer */
 	port = cfg->port_number;
 	server.sin_family = PF_INET; /* Internet domain */
@@ -70,7 +82,7 @@ int main(int argc, char *argv[]) {
 
 		if ((err = pthread_create(&tid[i], NULL, &connection_handler,
 				(void *) cfg)) == 1) {
-
+			perror("pthread_create");
 			exit(1);
 		}
 
@@ -86,12 +98,16 @@ int main(int argc, char *argv[]) {
 		}
 
 		pN = (NODE *) malloc(sizeof(NODE));
+		if (pN==NULL) {
+			perror("malloc");	
+			exit(EXIT_FAILURE);
+		}
 		pN->data = newsock;
 		Enqueue(qSock, pN);
 
 		/* send signal to condition  */
 		if ((err = pthread_cond_signal(&cond)) == TRUE) {
-			printf("pthread_cond_signal: %s\n", strerror(err));
+			perror("pthread_cond_signal");
 			exit(1);
 		}
 
@@ -102,8 +118,7 @@ int main(int argc, char *argv[]) {
 
 			exit(1);
 		}
-		printf("Accepted connection from %s %d added to queue\n", rem->h_name,
-				newsock);
+		printf("Accepted connection from %s\n", rem->h_name);
 
 
 	} /* end of while(1) */
@@ -117,7 +132,7 @@ void *connection_handler(void *cinfo1) {
 	int newsock;
 	while (TRUE) {
 		if ((err = pthread_mutex_lock(&mutex)) == TRUE) { /* lock mutex */
-			printf("pthread_mutex_lock: %s\n", strerror(err));
+			perror("pthread_mutex_lock");
 			exit(1);
 		}
 
@@ -125,7 +140,7 @@ void *connection_handler(void *cinfo1) {
 
 			// wait server to put a node in the queue
 			if ((err = pthread_cond_wait(&cond, &mutex)) == TRUE) {
-				printf("pthread_cond_wait: %s\n", strerror(err));
+				perror("pthread_cond_wait");
 				exit(1);
 			}
 
@@ -134,13 +149,13 @@ void *connection_handler(void *cinfo1) {
 		newsock = Dequeue(qSock);
 
 		if ((err = pthread_mutex_unlock(&mutex)) == TRUE) { /* unlock mutex */
-			printf("pthread_mutex_unlock: %s\n", strerror(err));
+			perror("pthread_mutex_unlock");
 			exit(1);
 		}
 
 		CONFIG *cfg = (CONFIG *) cinfo1;
 
-		printf("serving connection = %d\n", newsock);
+		//printf("serving connection = %d\n", newsock);
 
 		do {
 			char buf[2560];
