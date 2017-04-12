@@ -1,9 +1,9 @@
 ###############################################
 # Makefile for compiling the program skeleton
 # 'make'           build executable file 'PROJ'
-# 'make doxy'   build project manual in doxygen
-# 'make all'       build project + manual
-# 'make clean'  removes all .o, executable and doxy log
+# 'make test'   build test files for project
+# 'make all'       build project + test
+# 'make clean'  removes all .o, executable 
 ###############################################
 PROJ = s   # the name of the project
 CC   = gcc            # name of compiler 
@@ -32,12 +32,11 @@ $(PROJ): $(OBJS)
 all : 
 	make
 	gcc TestFile.c libs.h msgmodule.h msgmodule.c filemodule.h filemodule.c -Wall -DDEBUG=1 -o TestFile
-	#make doxy
-# To make all (program + manual) "make doxy"      
+
+# To make test file: "make test"      
 test :
 	gcc TestFile.c libs.h msgmodule.h msgmodule.c filemodule.h filemodule.c -Wall -DDEBUG=1 -o TestFile
-#doxy:
-#	$(DOXYGEN) doxygen.conf &> doxygen.log
+
 # To clean .o files: "make clean"
 clean:
-	rm -rf *.o doxygen.log html
+	rm -rf *.o 
