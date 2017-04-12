@@ -122,6 +122,7 @@ int main(int argc, char *argv[]) {
 void *connection_handler(void *cinfo1) {
 	int x = TRUE;
 	int newsock;
+	char buf[2560];
 	while (TRUE) {
 		if ((err = pthread_mutex_lock(&mutex)) == TRUE) { /* lock mutex */
 			perror("pthread_mutex_lock");
@@ -150,7 +151,10 @@ void *connection_handler(void *cinfo1) {
 		//printf("serving connection = %d\n", newsock);
 
 		do {
-			char buf[2560];
+			//clear buf
+			memset( buf, 0x00, sizeof(buf) );
+
+			
 			bzero(buf, sizeof(buf));
 			if (read(newsock, buf, sizeof(buf)) < 0) {
 				perror("read");

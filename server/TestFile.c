@@ -30,7 +30,7 @@ int main() {
     printf("############################################################################\n\n\n");
 
     printf("############################################################################\n");
-    printf("Testing Function get_filetype\n");
+    printf("Testing Function get_filetype on %s\n",filename);
     printf("############################################################################\n");
     filetype = get_filetype(filename);
     printf("%s\n", filetype);
@@ -64,18 +64,18 @@ int main() {
     printf("############################################################################\n\n\n");
 
     printf("############################################################################\n");
-    printf("Testing Function fileContents\n");
+    printf("Testing Function fileContents on %s\n",filename);
     printf("############################################################################\n");
     printf("%s\n", fileContents(filename));
     printf("############################################################################\n\n\n");
 
     printf("############################################################################\n");
-    printf("Testing Function getFileSize\n");
+    printf("Testing Function getFileSize of %s\n",filename);
     printf("############################################################################\n");
     printf("%d\n", getFileSize(filename));
     printf("############################################################################\n\n\n");
 
-
+return 0;
 }
 
 #endif
