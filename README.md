@@ -2,9 +2,10 @@
 
 ## Contributors
 ```
-Andreas Charalampous
-Modestos Ioannou
+Andreas Charalampous achara28@cs.ucy.ac.cy
+Modestos Ioannou     mioann47@cs.ucy.ac.cy
 Chrystalla Chrysostomou
+
 ```
 See also the list of [contributors](https://github.com/mioann47/EPL371as4/contributors) who participated in this project.
 
@@ -18,8 +19,10 @@ After configuring the config.json file you can "run" the server by executing the
 into terminal, then you can open any browser (Mozilla Firefox , Google Chrome , Safari)
 and make a GET request. At address bar you shall write " localhost:<port>/<file>"
 
+
 ```
 e.g localhost:8080/index.html
+
 ```
 
 You can open multiple tabs and make multiple GET requests as described above.
