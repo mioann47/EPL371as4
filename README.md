@@ -22,7 +22,6 @@ and make a GET request. At address bar you shall write " localhost:<port>/<file>
 
 ```
 e.g localhost:8080/index.html
-
 ```
 
 You can open multiple tabs and make multiple GET requests as described above.
@@ -31,8 +30,10 @@ You can use telnet command to make HEAD and DELETE requests.
 
 You can terminate the server with ctrl-c keyboard combination
 
+## Test File
 You can compile the test file by using "make test" into terminal and then execute it by "./TestFile" command
 to see the test results.
+
 ## License
 
 This project is licensed under the Apache License - see the [LICENSE.txt](LICENSE.txt) file for details
