@@ -2,10 +2,10 @@
 
 void ConstructQueue(Queue** queue) {
 	*queue = (Queue*) malloc(sizeof(Queue));
-	if (*queue==NULL){
-			perror("malloc");
-			exit(EXIT_FAILURE);
-			}
+	if (*queue == NULL) {
+		perror("malloc");
+		exit(EXIT_FAILURE);
+	}
 
 	(*queue)->limit = 65535;
 	(*queue)->size = 0;
@@ -73,23 +73,23 @@ int isEmpty(Queue* pQueue) {
 }
 
 #ifdef DEBUG
- int main() {
- int i;
- Queue *pQ = ConstructQueue(7);
- NODE *pN;
- int x;
- for (i = 0; i < 9; i++) {
- pN = (NODE*) malloc(sizeof (NODE));
- pN->data = 100 + i;
- Enqueue(pQ, pN);
- }
+int main() {
+	int i;
+	Queue *pQ = ConstructQueue(7);
+	NODE *pN;
+	int x;
+	for (i = 0; i < 9; i++) {
+		pN = (NODE*) malloc(sizeof (NODE));
+		pN->data = 100 + i;
+		Enqueue(pQ, pN);
+	}
 
- while (!isEmpty(pQ)) {
- x = Dequeue(pQ);
- printf("\nDequeued: %d", x);
+	while (!isEmpty(pQ)) {
+		x = Dequeue(pQ);
+		printf("\nDequeued: %d", x);
 
- }
- DestructQueue(pQ);
- return (EXIT_SUCCESS);
- }
+	}
+	DestructQueue(pQ);
+	return (EXIT_SUCCESS);
+}
 #endif

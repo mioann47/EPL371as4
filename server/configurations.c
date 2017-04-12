@@ -38,10 +38,7 @@ void readConfigurations(CONFIG* cfg) {
 		exit(1);
 	}
 
-	
-
 	fclose(fp);
-	
 
 	char* temp;
 	int i;
@@ -68,9 +65,9 @@ void readConfigurations(CONFIG* cfg) {
 		if (jsoneq(JSON_STRING, &t[i], "port") == 0) {
 
 			temp = (char*) malloc(100);
-				if (temp==NULL){
-			perror("malloc");
-			exit(EXIT_FAILURE);
+			if (temp == NULL) {
+				perror("malloc");
+				exit(EXIT_FAILURE);
 			}
 			sprintf(temp, "%.*s", t[i + 1].end - t[i + 1].start,
 					JSON_STRING + t[i + 1].start);
@@ -81,9 +78,9 @@ void readConfigurations(CONFIG* cfg) {
 		} else if (jsoneq(JSON_STRING, &t[i], "threads") == 0) {
 
 			temp = (char*) malloc(100);
-				if (temp==NULL){
-			perror("malloc");
-			exit(EXIT_FAILURE);
+			if (temp == NULL) {
+				perror("malloc");
+				exit(EXIT_FAILURE);
 			}
 			sprintf(temp, "%.*s", t[i + 1].end - t[i + 1].start,
 					JSON_STRING + t[i + 1].start);
@@ -94,9 +91,9 @@ void readConfigurations(CONFIG* cfg) {
 		} else if (jsoneq(JSON_STRING, &t[i], "folder") == 0) {
 
 			temp = (char*) malloc(100);
-				if (temp==NULL){
-			perror("malloc");
-			exit(EXIT_FAILURE);
+			if (temp == NULL) {
+				perror("malloc");
+				exit(EXIT_FAILURE);
 			}
 			sprintf(temp, "%.*s", t[i + 1].end - t[i + 1].start,
 					JSON_STRING + t[i + 1].start);

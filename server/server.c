@@ -1,4 +1,3 @@
-
 #include "libs.h"
 #include "filemodule.h"
 #include "msgmodule.h"
@@ -15,22 +14,20 @@ int err;
 
 int main(int argc, char *argv[]) {
 	/* Install signal handler */
-	signal(SIGINT, signal_handler); 
+	signal(SIGINT, signal_handler);
 
 	ConstructQueue(&qSock);
 	NODE *pN;
 
 	CONFIG *cfg = (CONFIG *) malloc(sizeof(CONFIG));
-			if (cfg==NULL){
-			perror("malloc");	
-			exit(EXIT_FAILURE);		
-			}
+	if (cfg == NULL) {
+		perror("malloc");
+		exit(EXIT_FAILURE);
+	}
 	readConfigurations(cfg);
-	
-	
+
 	// Thread ID
 	pthread_t tid[cfg->number_of_threads];
-	
 
 	int newsock;
 	int port, sock, serverlen;
@@ -46,14 +43,12 @@ int main(int argc, char *argv[]) {
 		exit(1);
 	}
 
-
-	int reuse= 1;
-	if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (char *)&reuse, sizeof(int))< 0) {
-	perror("setsockopt");
-	exit(1);
-	}	
-
-
+	int reuse = 1;
+	if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (char *) &reuse, sizeof(int))
+			< 0) {
+		perror("setsockopt");
+		exit(1);
+	}
 
 	/* Convert port number to integer */
 	port = cfg->port_number;
@@ -98,8 +93,8 @@ int main(int argc, char *argv[]) {
 		}
 
 		pN = (NODE *) malloc(sizeof(NODE));
-		if (pN==NULL) {
-			perror("malloc");	
+		if (pN == NULL) {
+			perror("malloc");
 			exit(EXIT_FAILURE);
 		}
 		pN->data = newsock;
@@ -120,10 +115,7 @@ int main(int argc, char *argv[]) {
 		}
 		printf("Accepted connection from %s\n", rem->h_name);
 
-
 	} /* end of while(1) */
-
-	
 
 } /* end of main() */
 
@@ -173,16 +165,14 @@ void *connection_handler(void *cinfo1) {
 			x = writeIntoSock(newsock, buf, cfg);
 
 		} while (x == TRUE);
-		
 
 		close(newsock);
 
 	}
 }
 
-
 void signal_handler(int sig) {
-printf("Server Terminated\n");
-exit(EXIT_SUCCESS);
+	printf("Server Terminated\n");
+	exit(EXIT_SUCCESS);
 }
 

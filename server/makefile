@@ -28,13 +28,16 @@ $(PROJ): $(OBJS)
 .c.o:
 	$(CC) $(CFLAGS)  -c $<
 # there is a TAB for each identation. 
-# To make all (program + manual) "make all"      
+# To make all (program + test file) "make all"      
 all : 
 	make
-	make doxy
+	gcc TestFile.c libs.h msgmodule.h msgmodule.c filemodule.h filemodule.c -Wall -DDEBUG=1 -o TestFile
+	#make doxy
 # To make all (program + manual) "make doxy"      
-doxy:
-	$(DOXYGEN) doxygen.conf &> doxygen.log
+test :
+	gcc TestFile.c libs.h msgmodule.h msgmodule.c filemodule.h filemodule.c -Wall -DDEBUG=1 -o TestFile
+#doxy:
+#	$(DOXYGEN) doxygen.conf &> doxygen.log
 # To clean .o files: "make clean"
 clean:
 	rm -rf *.o doxygen.log html

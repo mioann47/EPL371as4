@@ -29,7 +29,6 @@ char *fileContents(char *path) {
 		exit(EXIT_FAILURE);
 	}
 
-
 	fclose(fp);
 
 	return buffer;
@@ -37,10 +36,10 @@ char *fileContents(char *path) {
 
 char *get_filetype(char *filename) {
 	char *temp = malloc(31);
-			if (temp==NULL){
-			perror("malloc");
-			exit(EXIT_FAILURE);
-			}
+	if (temp == NULL) {
+		perror("malloc");
+		exit(EXIT_FAILURE);
+	}
 	if (strstr(filename, ".html") || strstr(filename, ".htm"))
 		strcpy(temp, "text/html");
 	else if (strstr(filename, ".gif"))
@@ -169,10 +168,10 @@ int writeIntoSock(int newsock, char *buf, CONFIG *cfg) {
 		/*build new path*/
 		char* path = (char*) malloc(
 				strlen(file) + strlen(cfg->server_file_folder) + 1);
-			if (path==NULL){
+		if (path == NULL) {
 			perror("malloc");
 			exit(EXIT_FAILURE);
-			}
+		}
 		strcpy(path, cfg->server_file_folder);
 		strcat(path, file);
 
@@ -212,7 +211,6 @@ int writeIntoSock(int newsock, char *buf, CONFIG *cfg) {
 
 			/*get header*/
 			msgtemp = msg_ok(filebuffer, connection, filetype, fsize);
-			
 
 			/* Send header */
 			if (write(newsock, msgtemp, strlen(msgtemp)) < 0) {
@@ -241,27 +239,52 @@ int writeIntoSock(int newsock, char *buf, CONFIG *cfg) {
 		return checkConnection(connection); //check connection
 	} else if (strcmp(request, "DELETE") == 0) {
 
-		FILE *fp;
-		fp = fopen(file, "rb");
+		/*build new path*/
+		char* path = (char*) malloc(
+				strlen(file) + strlen(cfg->server_file_folder) + 1);
+		if (path == NULL) {
+			perror("malloc");
+			exit(EXIT_FAILURE);
+		}
+		strcpy(path, cfg->server_file_folder);
+		strcat(path, file);
 
-		if (!fp) {
-			
-			msgtemp = msg_not_found(connection);
+		if (isFolder(path)) {
+			msgtemp = msg_bad_request(connection);
 			if (write(newsock, msgtemp, strlen(msgtemp)) < 0) {
 				perror("write");
 				return FALSE;
 			}
 
+			if (msgtemp != NULL)
+				free(msgtemp);
+
+			return checkConnection(connection); //check connection
+		}
+		FILE *fp;
+		fp = fopen(path, "rb");
+
+		if (!fp) {
+
+			msgtemp = msg_not_found(connection);
+			if (write(newsock, msgtemp, strlen(msgtemp)) < 0) {
+				perror("write");
+				return FALSE;
+			}
+			if (msgtemp != NULL)
+				free(msgtemp);
+			return checkConnection(connection); //check connection
+
 		}
 
-		if (remove(file) == 0) {
+		if (remove(path) == 0) {
 			msgtemp = msg_deleted_ok(connection);
 			if (write(newsock, msgtemp, strlen(msgtemp)) < 0) {
 				perror("write");
 				return FALSE;
 			}
 		} else {
-			msgtemp = msg_deleted_ok(connection);
+			msgtemp = msg_not_deleted_ok(connection);
 			if (write(newsock, msgtemp, strlen(msgtemp)) < 0) {
 				perror("write");
 				return FALSE;
@@ -269,20 +292,19 @@ int writeIntoSock(int newsock, char *buf, CONFIG *cfg) {
 		}
 		fclose(fp);
 		if (msgtemp != NULL)
-				free(msgtemp);
+			free(msgtemp);
 		return checkConnection(connection); //check connection
 	} else {
-		
-		
+
 		msgtemp = msg_not_implemented(connection);
 		if (write(newsock, msgtemp, strlen(msgtemp)) < 0) {
 			perror("write");
 			return FALSE;
 		}
 		if (msgtemp != NULL)
-				free(msgtemp);
+			free(msgtemp);
 		return checkConnection(connection); //check connection
-		
+
 	}
 
 }
